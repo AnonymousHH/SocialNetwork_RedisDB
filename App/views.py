@@ -9,8 +9,8 @@ import redis
 
 
 def enterPage(request):
-    page = loader.get_template('EnterPage.html')
-    return HttpResponse(page.render())
+    IdError = dict(register='hideRegister', login='hideLogin')
+    return render(request, 'EnterPage.html', {'IdError': IdError})
 
 
 @csrf_exempt
@@ -19,6 +19,13 @@ def Login(request):
     emailInput = request.POST['email']
     passwordInput = request.POST['pwd']
     connection = redis.StrictRedis(host='localhost', port=6379, db=0)
+    if connection.hset(emailInput, 'password', passwordInput):
+        connection.hdel(emailInput)
+        IdError = dict(register='hideRegister', login='showLogin')
+        return render(request, 'EnterPage.html', {'IdError': IdError})
+    else:
+        massage = dict(dataPass='login complete')
+        return render(request, 'home.html', {'message': massage})
     pass
 
 
@@ -33,11 +40,11 @@ def Register(request):
     if connection.hset(email, 'name', name) and connection.hset(email, 'family', family) and connection.hset(email,
                                                                                                              'password',
                                                                                                              password):
-        massage = dict(dataPass='login complete')
-        return render(request, 'home.html', {'messageRegister': massage})
+        IdError = dict(register='showRegister', login='hideLogin')
+        return render(request, 'EnterPage.html', {'IdError': IdError})
     else:
         massage = dict(ErrorRegister='login not complete')
-        return render(request, 'EnterPage.html', {'messageRegister': massage})
+        return render(request, 'EnterPage.html', {'message': massage})
     pass
 
 
@@ -55,4 +62,3 @@ def your_name(request):
     massage = connection.get('name')
     string = str(massage, 'utf-8')
     return HttpResponse("Hello %s" % string)
-

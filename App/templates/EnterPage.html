@@ -33,9 +33,11 @@
                         <input type="password" class="form-control" id="pwd" placeholder="Enter password" name="pwd">
                     </div>
                 </div>
-                <div class="form-group">
+                <div class="form-group" id="{{ IdError.login }}">
                     <div class="col-sm-offset-2 col-sm-10">
-                        <p class="bg-danger"><strong>Warning.....</strong></p>
+                        <div class="alert alert-danger">
+                            <strong>Error : </strong>username or password is not correct please try again.
+                        </div>
                     </div>
                 </div>
                 <div class="form-group">
@@ -73,10 +75,10 @@
                         <input type="password" class="form-control" id="pwd" placeholder="Enter password" name="pwd">
                     </div>
                 </div>
-                <div class="form-group">
+                <div class="form-group" id="{{ IdError.register }}">
                     <div class="col-sm-offset-2 col-sm-10">
                         <div class="alert alert-danger">
-                            <strong>Error!</strong> {{ messageRegister.ErrorRegister }}
+                            <strong>Error : </strong>Input value is not correct please try again
                         </div>
                     </div>
                 </div>
@@ -93,7 +95,12 @@
 
 <script>
     //document.getElementById("defaultOpen").click();
-
+    $(document).ready(function () {
+        $("#hideLogin").css("display", "none");
+        $("#hideRegister").css("display", "none");
+        $("#showLogin").css("display", "block");
+        $("#showRegister").css("display", "block");
+    })
 </script>
 </body>
 </html>
