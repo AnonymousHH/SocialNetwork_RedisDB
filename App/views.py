@@ -19,7 +19,6 @@ def Login(request):
     emailInput = request.POST['email']
     passwordInput = request.POST['pwd']
     connection = redis.StrictRedis(host='localhost', port=6379, db=0)
-
     pass
 
 
