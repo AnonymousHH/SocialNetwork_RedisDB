@@ -34,32 +34,26 @@ def UserHomePage(request, UserId):
     counter = 0
     for i in range(len(AllPostToken)):
         AllPostToken[i] = str(AllPostToken[i], 'utf-8')
-        EmailAndTopic_byte = connection.hgetall(AllPostToken[i])
-        EmailAndTopic = dict()
-        for k in EmailAndTopic_byte:
+        PostTable_byte = connection.hgetall(AllPostToken[i])
+        PostTable = dict()
+        for k in PostTable_byte:
             key = str(k, 'utf-8')
-            value = EmailAndTopic_byte[k]
-            EmailAndTopic[key] = str(value, 'utf-8')
-        for EmailOfWhoPostIt in EmailAndTopic:
-            NameOfWhoPostIt_byte = connection.hget(EmailOfWhoPostIt, 'name')
-            NameOfWhoPostIt = str(NameOfWhoPostIt_byte, 'utf-8')
-            PostTopic = EmailAndTopic[EmailOfWhoPostIt]
-            PostTopicTableName = PostTopic + '' + EmailOfWhoPostIt
-            PostData_byte = connection.hgetall(PostTopicTableName)
-            PostData = dict()
-            for k in PostData_byte:
-                key = str(k, 'utf-8')
-                value = PostData_byte[k]
-                PostData[key] = str(value, 'utf-8')
-            PostType = PostData['PostType']
-            PostBody = PostData['body']
-            tempDictionary = PostInfo[counter]
-            tempDictionary['name'] = NameOfWhoPostIt
-            tempDictionary['topic'] = PostTopic
-            tempDictionary['body'] = PostBody
-            tempDictionary['type'] = PostType
-            tempDictionary['email'] = EmailOfWhoPostIt
-            counter += 1
+            value = PostTable_byte[k]
+            PostTable[key] = str(value, 'utf-8')
+        EmailOfWhoPostIt = PostTable['email']
+        NameOfWhoPostIt_byte = connection.hget(EmailOfWhoPostIt, 'name')
+        NameOfWhoPostIt = str(NameOfWhoPostIt_byte, 'utf-8')
+        PostTopic = PostTable['topic']
+        PostType = PostTable['PostType']
+        PostBody = PostTable['body']
+        tempDictionary = PostInfo[counter]
+        tempDictionary['name'] = NameOfWhoPostIt
+        tempDictionary['topic'] = PostTopic
+        tempDictionary['body'] = PostBody
+        tempDictionary['type'] = PostType
+        tempDictionary['email'] = EmailOfWhoPostIt
+        counter += 1
+
     active = dict(home='active', profile='')
     return render(request, 'home.html', {'UserInfo': UserInfo, 'active': active, 'PostInfo': PostInfo})
 
@@ -124,8 +118,8 @@ def Register(request):
 @csrf_exempt
 @require_POST
 def UserPost(request, UserId):
-    PostTextTopic = request.POST['UserPostTopic']
-    PostTextBody = request.POST['UserPostBody']
+    PostTopic = request.POST['UserPostTopic']
+    PostBody = request.POST['UserPostBody']
     if 'private' in request.POST:
         PostType = 'private'
     else:
@@ -134,11 +128,12 @@ def UserPost(request, UserId):
     getUser = connection.hget('user', UserId)
     emailUser = str(getUser, 'utf-8')
     PostTableName = 'PostTable' + emailUser
-    PostTopicTableName = PostTextTopic + '' + emailUser
     Timestamp = time.time()
     token = str(Timestamp) + emailUser
     connection.rpush(PostTableName, token)
-    connection.hset(token, emailUser, PostTextTopic)
-    connection.hset(PostTopicTableName, 'body', PostTextBody)
-    connection.hset(PostTopicTableName, 'PostType', PostType)
+    connection.hset(token, emailUser, PostTopic)
+    connection.hset(token, 'email', emailUser)
+    connection.hset(token, 'topic', PostTopic)
+    connection.hset(token, 'body', PostBody)
+    connection.hset(token, 'PostType', PostType)
     return HttpResponseRedirect('/UserHomePage/' + UserId)
