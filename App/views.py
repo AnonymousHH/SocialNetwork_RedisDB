@@ -120,10 +120,7 @@ def Register(request):
 def UserPost(request, UserId):
     PostTopic = request.POST['UserPostTopic']
     PostBody = request.POST['UserPostBody']
-    if 'private' in request.POST:
-        PostType = 'private'
-    else:
-        PostType = 'public'
+    PostType = request.POST['PostType']
     connection = redis.StrictRedis(host='localhost', port=6379, db=0)
     getUser = connection.hget('user', UserId)
     emailUser = str(getUser, 'utf-8')
