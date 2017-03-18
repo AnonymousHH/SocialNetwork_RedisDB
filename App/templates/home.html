@@ -1,11 +1,12 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block primary %}
     <div class="container text-center">
         <div class="row">
             <div class="col-sm-3 well">
                 <div class="well">
                     <p><a href="#">My Profile</a></p>
-                    <img src="bird.jpg" class="img-circle" height="65" width="65" alt="Avatar">
+                    <img src="{% static 'Image/member-1.jpg' %}" class="img-circle" height="65" width="65" alt="Avatar">
                 </div>
                 <div class="well">
                     <p><a href="#">Interests</a></p>
@@ -19,7 +20,7 @@
                     </p>
                 </div>
                 <div class="alert alert-success fade in">
-                    <a href="#" class="close" data-dismiss="alert" aria-label="close">Ã—</a>
+                    <a href="#" class="close" data-dismiss="alert" aria-label="close">X</a>
                     <p><strong>Ey!</strong></p>
                     People are looking at your profile. Find out who.
                 </div>
@@ -31,22 +32,69 @@
 
                 <div class="row">
                     <div class="col-sm-12">
-                        <div class="panel panel-default text-left">
-                            <div class="panel-body">
-                                <p contenteditable="true">Status: Feeling Blue</p>
-                                <button type="button" class="btn btn-default btn-sm">
-                                    <span class="glyphicon glyphicon-thumbs-up"></span> Like
-                                </button>
+                        <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#PostModal"
+                                style="margin-bottom: 25px;float: left;">
+                            Your Post
+                        </button>
+                    </div>
+                </div>
+                <div class="modal fade" id="PostModal" role="dialog">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                <h4 class="modal-title"><strong>Submit Your Post</strong></h4>
                             </div>
+                            <form action="/UserPost/{{ UserInfo.UserId }}" method="post">
+                                <div class="modal-body">
+                                    <div class="form-group">
+                                        <label for="YourPostTopic" style="float: left;font-size: 18px">Topic : </label>
+                                        <textarea class="form-control" rows="1" id="YourPostTopic"
+                                                  name="UserPostTopic"></textarea>
+                                        <label for="YourPostBody" style="float: left;font-size: 18px">Post : </label>
+                                        <textarea class="form-control" rows="5" id="YourPostBody"
+                                                  name="UserPostBody"></textarea>
+                                        <label class="radio-inline"><input type="radio" name="TypePost" value="private">Private
+                                            Post</label>
+                                        <label class="radio-inline"><input type="radio" name="TypePost" value="public">Public
+                                            Post</label>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <div class="form-group">
+                                        <button type="submit" class="btn btn-success">POST</button>
+                                        <button type="button" class="btn btn-danger" data-dismiss="modal">Close
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
                         </div>
                     </div>
                 </div>
-
+                {% for PostEnetr in PostInfo %}
+                    <div class="row">
+                        <div class="col-sm-3">
+                            <div class="well">
+                                <p>{{ PostEnetr.name }}</p>
+                                <p>Type:{{ PostEnetr.type }}</p>
+                                <img src="{% static 'Image/member-1.jpg' %}" class="img-circle" height="55" width="55"
+                                     alt="Avatar">
+                            </div>
+                        </div>
+                        <div class="col-sm-9">
+                            <div class="well">
+                                <p><strong>{{ PostEnetr.topic }}</strong></p>
+                                <p>{{ PostEnetr.body }}</p>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
                 <div class="row">
                     <div class="col-sm-3">
                         <div class="well">
                             <p>John</p>
-                            <img src="bird.jpg" class="img-circle" height="55" width="55" alt="Avatar">
+                            <img src="{% static 'Image/member-1.jpg' %}" class="img-circle" height="55" width="55"
+                                 alt="Avatar">
                         </div>
                     </div>
                     <div class="col-sm-9">
@@ -60,7 +108,8 @@
                     <div class="col-sm-3">
                         <div class="well">
                             <p>Bo</p>
-                            <img src="bandmember.jpg" class="img-circle" height="55" width="55" alt="Avatar">
+                            <img src="{% static 'Image/member-1.jpg' %}" class="img-circle" height="55" width="55"
+                                 alt="Avatar">
                         </div>
                     </div>
                     <div class="col-sm-9">
@@ -74,7 +123,8 @@
                     <div class="col-sm-3">
                         <div class="well">
                             <p>Jane</p>
-                            <img src="bandmember.jpg" class="img-circle" height="55" width="55" alt="Avatar">
+                            <img src="{% static 'Image/member-1.jpg' %}" class="img-circle" height="55" width="55"
+                                 alt="Avatar">
                         </div>
                     </div>
                     <div class="col-sm-9">
@@ -88,7 +138,8 @@
                     <div class="col-sm-3">
                         <div class="well">
                             <p>Anja</p>
-                            <img src="bird.jpg" class="img-circle" height="55" width="55" alt="Avatar">
+                            <img src="{% static 'Image/member-1.jpg' %}" class="img-circle" height="55" width="55"
+                                 alt="Avatar">
                         </div>
                     </div>
                     <div class="col-sm-9">
@@ -102,7 +153,7 @@
             <div class="col-sm-2 well">
                 <div class="thumbnail">
                     <p>Upcoming Events:</p>
-                    <img src="paris.jpg" alt="Paris" width="400" height="300">
+                    <img src="{% static 'Image/member-1.jpg' %}" alt="Paris" width="400" height="300">
                     <p><strong>Paris</strong></p>
                     <p>Fri. 27 November 2015</p>
                     <button class="btn btn-primary">Info</button>
