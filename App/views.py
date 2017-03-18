@@ -5,6 +5,7 @@ from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 import redis
+import time
 
 
 def enterPage(request):
@@ -28,34 +29,37 @@ def UserHomePage(request, UserId):
     UserInfo[key] = UserId
 
     PostTableName = 'PostTable' + emailUser
-    AllPostInTableWithEmailAndId_byte = connection.hgetall(PostTableName)
-    PostInfo = [dict() for x in range(connection.hlen(PostTableName))]
-    AllPostInTableWithEmailAndId = dict()
-    for i in AllPostInTableWithEmailAndId_byte:
-        key = str(i, 'utf-8')
-        value = AllPostInTableWithEmailAndId_byte[i]
-        AllPostInTableWithEmailAndId[key] = str(value, 'utf-8')
+    AllPostToken = connection.lrange(PostTableName, 0, -1)
+    PostInfo = [dict() for x in range(len(AllPostToken))]
     counter = 0
-    for EmailOfWhoPostIt in AllPostInTableWithEmailAndId:
-        NameOfWhoPostIt_byte = connection.hget(EmailOfWhoPostIt, 'name')
-        NameOfWhoPostIt = str(NameOfWhoPostIt_byte, 'utf-8')
-        PostTopic = AllPostInTableWithEmailAndId[EmailOfWhoPostIt]
-        PostTopicTableName = PostTopic + '' + EmailOfWhoPostIt
-        PostData_byte = connection.hgetall(PostTopicTableName)
-        PostData = dict()
-        for k in PostData_byte:
+    for i in range(len(AllPostToken)):
+        AllPostToken[i] = str(AllPostToken[i], 'utf-8')
+        EmailAndTopic_byte = connection.hgetall(AllPostToken[i])
+        EmailAndTopic = dict()
+        for k in EmailAndTopic_byte:
             key = str(k, 'utf-8')
-            value = PostData_byte[k]
-            PostData[key] = str(value, 'utf-8')
-        PostType = PostData['PostType']
-        PostBody = PostData['body']
-        tempDictionary = PostInfo[counter]
-        tempDictionary['name'] = NameOfWhoPostIt
-        tempDictionary['topic'] = PostTopic
-        tempDictionary['body'] = PostBody
-        tempDictionary['type'] = PostType
-        counter += 1
-
+            value = EmailAndTopic_byte[k]
+            EmailAndTopic[key] = str(value, 'utf-8')
+        for EmailOfWhoPostIt in EmailAndTopic:
+            NameOfWhoPostIt_byte = connection.hget(EmailOfWhoPostIt, 'name')
+            NameOfWhoPostIt = str(NameOfWhoPostIt_byte, 'utf-8')
+            PostTopic = EmailAndTopic[EmailOfWhoPostIt]
+            PostTopicTableName = PostTopic + '' + EmailOfWhoPostIt
+            PostData_byte = connection.hgetall(PostTopicTableName)
+            PostData = dict()
+            for k in PostData_byte:
+                key = str(k, 'utf-8')
+                value = PostData_byte[k]
+                PostData[key] = str(value, 'utf-8')
+            PostType = PostData['PostType']
+            PostBody = PostData['body']
+            tempDictionary = PostInfo[counter]
+            tempDictionary['name'] = NameOfWhoPostIt
+            tempDictionary['topic'] = PostTopic
+            tempDictionary['body'] = PostBody
+            tempDictionary['type'] = PostType
+            tempDictionary['email'] = EmailOfWhoPostIt
+            counter += 1
     active = dict(home='active', profile='')
     return render(request, 'home.html', {'UserInfo': UserInfo, 'active': active, 'PostInfo': PostInfo})
 
@@ -131,7 +135,10 @@ def UserPost(request, UserId):
     emailUser = str(getUser, 'utf-8')
     PostTableName = 'PostTable' + emailUser
     PostTopicTableName = PostTextTopic + '' + emailUser
-    connection.hset(PostTableName, emailUser, PostTextTopic)
+    Timestamp = time.time()
+    token = str(Timestamp) + emailUser
+    connection.rpush(PostTableName, token)
+    connection.hset(token, emailUser, PostTextTopic)
     connection.hset(PostTopicTableName, 'body', PostTextBody)
     connection.hset(PostTopicTableName, 'PostType', PostType)
     return HttpResponseRedirect('/UserHomePage/' + UserId)
