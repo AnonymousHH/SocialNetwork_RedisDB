@@ -51,7 +51,21 @@ def UserHomePage(request, UserId):
         tempDictionary['topic'] = PostTopic
         tempDictionary['body'] = PostBody
         tempDictionary['type'] = PostType
-        tempDictionary['email'] = EmailOfWhoPostIt
+        tempDictionary['token'] = AllPostToken[i]
+        CommentTableName = 'comment' + AllPostToken[i]
+        CommentList_byte = connection.hgetall(CommentTableName)
+        CommentList = dict()
+        AllComment = []
+        for k in CommentList_byte:
+            EmailOfWhoCommentIt = str(k, 'utf-8')
+            CommentBody = CommentList_byte[k]
+            NameOfWhoCommentIt_byte = connection.hget(EmailOfWhoCommentIt, 'name')
+            NameOfWhoCommentIt = str(NameOfWhoCommentIt_byte, 'utf-8')
+            CommentList['name'] = NameOfWhoCommentIt
+            CommentList['body'] = str(CommentBody, 'utf-8')
+            AllComment.append(CommentList)
+        tempDictionary['comment'] = AllComment
+        tempDictionary['numberOfComment'] = len(CommentList_byte)
         counter += 1
 
     active = dict(home='active', profile='')
@@ -122,8 +136,8 @@ def UserPost(request, UserId):
     PostBody = request.POST['UserPostBody']
     PostType = request.POST['PostType']
     connection = redis.StrictRedis(host='localhost', port=6379, db=0)
-    getUser = connection.hget('user', UserId)
-    emailUser = str(getUser, 'utf-8')
+    getEmail = connection.hget('user', UserId)
+    emailUser = str(getEmail, 'utf-8')
     PostTableName = 'PostTable' + emailUser
     Timestamp = time.time()
     token = str(Timestamp) + emailUser
@@ -133,4 +147,18 @@ def UserPost(request, UserId):
     connection.hset(token, 'topic', PostTopic)
     connection.hset(token, 'body', PostBody)
     connection.hset(token, 'PostType', PostType)
+    return HttpResponseRedirect('/UserHomePage/' + UserId)
+
+
+@csrf_exempt
+@require_POST
+def UserComment(request, UserId):
+    token = request.POST['token']
+    CommentBody = request.POST['CommentBody']
+    connection = redis.StrictRedis(host='localhost', port=6379, db=0)
+    getEmail = connection.hget('user', UserId)
+    emailUser = str(getEmail, 'utf-8')
+    commentTableName = 'comment' + token
+    connection.hset(token, 'CommentTable', commentTableName)
+    connection.hset(commentTableName, emailUser, CommentBody)
     return HttpResponseRedirect('/UserHomePage/' + UserId)

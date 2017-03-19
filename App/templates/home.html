@@ -71,39 +71,73 @@
                         </div>
                     </div>
                 </div>
-                {% for PostEnetr in PostInfo %}
+                {% for PostEnter in PostInfo %}
                     <div class="row">
                         <div class="col-sm-3">
                             <div class="well">
-                                <p>{{ PostEnetr.name }}</p>
-                                <p>Type:{{ PostEnetr.type }}</p>
+                                <p>{{ PostEnter.name }}</p>
+                                <p>Type:{{ PostEnter.type }}</p>
                                 <img src="{% static 'Image/member-1.jpg' %}" class="img-circle" height="55" width="55"
                                      alt="Avatar">
                             </div>
                         </div>
                         <div class="col-sm-9">
                             <div class="well">
-                                <p><strong>{{ PostEnetr.topic }}</strong></p>
-                                <p>{{ PostEnetr.body }}</p>
+                                <div class="panel panel-primary">
+                                    <div class="panel-heading"><p><strong>{{ PostEnter.topic }}</strong></p></div>
+                                    <div class="panel-body"><p>{{ PostEnter.body }}</p></div>
+                                    <div class="panel-footer">
+                                        <a href="#ShowComment{{ PostEnter.topic }}" data-toggle="collapse">Comment <span class="badge">{{ PostEnter.numberOfComment }}</span></a>
+                                        <button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#TakeComment{{ PostEnter.topic }}">Take a comment!</button>
+                                        <div id="TakeComment{{ PostEnter.topic }}" class="collapse">
+                                            <div class="panel panel-default">
+                                                <div class="panel panel-default">
+                                                    <form action="/Comment/{{ UserInfo.UserId }}" method="post">
+                                                        <div class="modal-body">
+                                                            <div class="form-group">
+                                                                <label for="CommentBody" style="float: left;font-size: 18px">Comment : </label>
+                                                                <textarea class="form-control" rows="3" id="CommentBody" name="CommentBody"></textarea>
+                                                                <input type="hidden" name="token" value="{{ PostEnter.token }}">
+                                                            </div>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <div class="form-group">
+                                                                <button type="submit" class="btn btn-success btn-sm">
+                                                                    POST
+                                                                </button>
+                                                                <button type="button" class="btn btn-default btn-sm"
+                                                                        data-dismiss="modal">
+                                                                    Close
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div id="ShowComment{{ PostEnter.topic }}" class="collapse">
+                                            <div class="panel-group" id="accordion">
+                                                {% for eachComment in PostEnter.comment %}
+                                                    <div class="panel panel-default">
+                                                        <div class="panel-heading">
+                                                            <h4 class="panel-title">
+                                                                <a data-toggle="collapse" data-parent="#accordion"
+                                                                   href="#{{ eachComment.name }}">{{ eachComment.name }}</a>
+                                                            </h4>
+                                                        </div>
+                                                        <div id="{{ eachComment.name }}" class="panel-collapse collapse in">
+                                                            <div class="panel-body">{{ eachComment.body }}</div>
+                                                        </div>
+                                                    </div>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 {% endfor %}
-                <div class="row">
-                    <div class="col-sm-3">
-                        <div class="well">
-                            <p>John</p>
-                            <img src="{% static 'Image/member-1.jpg' %}" class="img-circle" height="55" width="55"
-                                 alt="Avatar">
-                        </div>
-                    </div>
-                    <div class="col-sm-9">
-                        <div class="well">
-                            <p>Just Forgot that I had to mention something about someone to someone about how I forgot
-                                something, but now I forgot it. Ahh, forget it! Or wait. I remember.... no I don't.</p>
-                        </div>
-                    </div>
-                </div>
                 <div class="row">
                     <div class="col-sm-3">
                         <div class="well">
@@ -113,39 +147,109 @@
                         </div>
                     </div>
                     <div class="col-sm-9">
-                        <div class="well">
-                            <p>Just Forgot that I had to mention something about someone to someone about how I forgot
-                                something, but now I forgot it. Ahh, forget it! Or wait. I remember.... no I don't.</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-sm-3">
-                        <div class="well">
-                            <p>Jane</p>
-                            <img src="{% static 'Image/member-1.jpg' %}" class="img-circle" height="55" width="55"
-                                 alt="Avatar">
-                        </div>
-                    </div>
-                    <div class="col-sm-9">
-                        <div class="well">
-                            <p>Just Forgot that I had to mention something about someone to someone about how I forgot
-                                something, but now I forgot it. Ahh, forget it! Or wait. I remember.... no I don't.</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-sm-3">
-                        <div class="well">
-                            <p>Anja</p>
-                            <img src="{% static 'Image/member-1.jpg' %}" class="img-circle" height="55" width="55"
-                                 alt="Avatar">
-                        </div>
-                    </div>
-                    <div class="col-sm-9">
-                        <div class="well">
-                            <p>Just Forgot that I had to mention something about someone to someone about how I forgot
-                                something, but now I forgot it. Ahh, forget it! Or wait. I remember.... no I don't.</p>
+                        <div class="panel panel-primary">
+                            <div class="panel-heading"><p><strong>Just Forgot that I had to mention</strong></p></div>
+                            <div class="panel-body"><p>Just Forgot that I had to mention something about someone to
+                                someone about how I forgot something, but now I forgot it. Ahh, forget it! Or wait. I
+                                remember.... no I don't......</p></div>
+                            <div class="panel-footer">
+                                <a href="#comment" data-toggle="collapse">Comment <span class="badge">10</span></a>
+                                <button type="button" class="btn btn-info btn-sm" data-toggle="modal"
+                                        data-target="#TakeComment">Take a comment!
+                                </button>
+                                <div class="modal fade" id="TakeComment" role="dialog">
+                                    <div class="modal-dialog modal-sm">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <button type="button" class="close"
+                                                        data-dismiss="modal">&times;</button>
+                                                <h4 class="modal-title">Your Comment</h4>
+                                            </div>
+                                            <form action="/UserPost/{{ UserInfo.UserId }}" method="post">
+                                                <div class="modal-body">
+                                                    <div class="form-group">
+                                                        <label for="CommentBody" style="float: left;font-size: 18px">Comment
+                                                            : </label>
+                                                        <textarea class="form-control" rows="3" id="CommentBody"
+                                                                  name="CommentBody"></textarea>
+                                                        <input type="hidden" name="token" value="English">
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <div class="form-group">
+                                                        <button type="submit" class="btn btn-success btn-sm">POST
+                                                        </button>
+                                                        <button type="button" class="btn btn-default btn-sm"
+                                                                data-dismiss="modal">
+                                                            Close
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="comment" class="collapse">
+                                    <div class="panel-group" id="accordion">
+                                        <div class="panel panel-default">
+                                            <div class="panel-heading">
+                                                <h4 class="panel-title">
+                                                    <a data-toggle="collapse" data-parent="#accordion"
+                                                       href="#collapse1">
+                                                        Collapsible Group 1</a>
+                                                </h4>
+                                            </div>
+                                            <div id="collapse1" class="panel-collapse collapse in">
+                                                <div class="panel-body">Lorem ipsum dolor sit amet, consectetur
+                                                    adipisicing elit,
+                                                    sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                                                    Ut enim ad
+                                                    minim veniam, quis nostrud exercitation ullamco laboris nisi ut
+                                                    aliquip ex ea
+                                                    commodo consequat.
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="panel panel-default">
+                                            <div class="panel-heading">
+                                                <h4 class="panel-title">
+                                                    <a data-toggle="collapse" data-parent="#accordion"
+                                                       href="#collapse2">Collapsible Group 2</a>
+                                                </h4>
+                                            </div>
+                                            <div id="collapse2" class="panel-collapse collapse">
+                                                <div class="panel-body">Lorem ipsum dolor sit amet, consectetur
+                                                    adipisicing elit,
+                                                    sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                                                    Ut enim ad
+                                                    minim veniam, quis nostrud exercitation ullamco laboris nisi ut
+                                                    aliquip ex ea
+                                                    commodo consequat.
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="panel panel-default">
+                                            <div class="panel-heading">
+                                                <h4 class="panel-title">
+                                                    <a data-toggle="collapse" data-parent="#accordion"
+                                                       href="#collapse3">
+                                                        Collapsible Group 3</a>
+                                                </h4>
+                                            </div>
+                                            <div id="collapse3" class="panel-collapse collapse">
+                                                <div class="panel-body">Lorem ipsum dolor sit amet, consectetur
+                                                    adipisicing elit,
+                                                    sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                                                    Ut enim ad
+                                                    minim veniam, quis nostrud exercitation ullamco laboris nisi ut
+                                                    aliquip ex ea
+                                                    commodo consequat.
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
