@@ -54,16 +54,17 @@ def UserHomePage(request, UserId):
         tempDictionary['token'] = AllPostToken[i]
         CommentTableName = 'comment' + AllPostToken[i]
         CommentList_byte = connection.hgetall(CommentTableName)
-        CommentList = dict()
-        AllComment = []
+        AllComment = [dict() for x in range(len(CommentList_byte))]
+        CounterComment = 0
         for k in CommentList_byte:
             EmailOfWhoCommentIt = str(k, 'utf-8')
             CommentBody = CommentList_byte[k]
             NameOfWhoCommentIt_byte = connection.hget(EmailOfWhoCommentIt, 'name')
             NameOfWhoCommentIt = str(NameOfWhoCommentIt_byte, 'utf-8')
+            CommentList = AllComment[CounterComment]
             CommentList['name'] = NameOfWhoCommentIt
             CommentList['body'] = str(CommentBody, 'utf-8')
-            AllComment.append(CommentList)
+            CounterComment += 1
         tempDictionary['comment'] = AllComment
         tempDictionary['numberOfComment'] = len(CommentList_byte)
         counter += 1
@@ -105,15 +106,9 @@ def Register(request):
     email = request.POST['email']
     password = request.POST['pwd']
     connection = redis.StrictRedis(host='localhost', port=6379, db=0)
-    UserPostTableName = 'UserPostTable' + email
-    FriendTableName = 'FriendTable' + email
-    UserBlockTableName = 'UserBlockTable' + email
     UserLikeTableName = 'UserLikeTable' + email
     if connection.hset(email, 'name', name) and connection.hset(email, 'family', family) and \
             connection.hset(email, 'password', password) and \
-            connection.hset(email, 'UserPostTable', UserPostTableName) and \
-            connection.hset(email, 'FriendTable', FriendTableName) and \
-            connection.hset(email, 'UserBlockTable', UserBlockTableName) and \
             connection.hset(email, 'UserLikeTable', UserLikeTableName):
         UserListLen = connection.hlen('user')
         Id = UserListLen + 1
@@ -139,9 +134,24 @@ def UserPost(request, UserId):
     getEmail = connection.hget('user', UserId)
     emailUser = str(getEmail, 'utf-8')
     PostTableName = 'PostTable' + emailUser
+    OwnPostTableName = 'OwnPostTable' + emailUser
+    FilterByTypePostTableName = PostType + 'PostTable' + emailUser
+    FollowerTableName = 'FollowerTable' + emailUser
     Timestamp = time.time()
     token = str(Timestamp) + emailUser
     connection.rpush(PostTableName, token)
+    connection.rpush(OwnPostTableName, token)
+    connection.rpush(FilterByTypePostTableName, token)
+    Follower_byte = connection.hgetall(FollowerTableName)
+    Follower = dict()
+    for k in Follower_byte:
+        key = str(k, 'utf-8')
+        value = Follower_byte[k]
+        Follower[key] = str(value, 'utf-8')
+    for key in Follower:
+        emailFollower = Follower[key]
+        FollowerPostTableName = 'PostTable' + emailFollower
+        connection.rpush(FollowerPostTableName, token)
     connection.hset(token, emailUser, PostTopic)
     connection.hset(token, 'email', emailUser)
     connection.hset(token, 'topic', PostTopic)
@@ -161,4 +171,257 @@ def UserComment(request, UserId):
     commentTableName = 'comment' + token
     connection.hset(token, 'CommentTable', commentTableName)
     connection.hset(commentTableName, emailUser, CommentBody)
+    return HttpResponseRedirect('/UserHomePage/' + UserId)
+
+
+def Search(request):
+    SearchQuery = request.POST['search']
+    pass
+
+
+def MyProfile(request, UserId):
+    connection = redis.StrictRedis(host='localhost', port=6379, db=0)
+    getUser = connection.hget('user', UserId)
+    emailUser = str(getUser, 'utf-8')
+    UserInfoTable = connection.hgetall(emailUser)
+    UserInfo = dict()
+    for k in UserInfoTable:
+        key = str(k, 'utf-8')
+        value = UserInfoTable[k]
+        UserInfo[key] = str(value, 'utf-8')
+    key = 'UserId'
+    UserInfo[key] = UserId
+    FriendInfo = dict()
+    FollowerTableName = 'FollowerTable' + emailUser
+    FollowingTableName = 'FollowingTable' + emailUser
+    Follower_byte = connection.hgetall(FollowerTableName)
+    FollowerList = [dict() for x in range(len(Follower_byte))]
+    CounterFollower = 0
+    for k in Follower_byte:
+        key = str(k, 'utf-8')
+        Follower = FollowerList[CounterFollower]
+        Follower['UserId'] = key
+        value_byte = Follower_byte[k]
+        email = str(value_byte, 'utf-8')
+        name_byte = connection.hget(email, 'name')
+        name = str(name_byte, 'utf-8')
+        Follower['name'] = name
+    Following_byte = connection.hgetall(FollowingTableName)
+    FollowingList = [dict() for x in range(len(Following_byte))]
+    CounterFollowing = 0
+    for k in Following_byte:
+        key = str(k, 'utf-8')
+        Following = FollowingList[CounterFollowing]
+        Following['UserId'] = key
+        value_byte = Following_byte[k]
+        email = str(value_byte, 'utf-8')
+        name_byte = connection.hget(email, 'name')
+        name = str(name_byte, 'utf-8')
+        Following['name'] = name
+        CounterFollowing += 1
+    FriendInfo['FollowerLen'] = len(Follower_byte)
+    FriendInfo['FollowingLen'] = len(Following_byte)
+    FriendInfo['FollowerList'] = FollowerList
+    FriendInfo['FollowingList'] = FollowingList
+
+    OwnPostTableName = 'OwnPostTable' + emailUser
+    AllPostToken = connection.lrange(OwnPostTableName, 0, -1)
+    PostInfo = [dict() for x in range(len(AllPostToken))]
+    counter = 0
+    for i in range(len(AllPostToken)):
+        AllPostToken[i] = str(AllPostToken[i], 'utf-8')
+        PostTable_byte = connection.hgetall(AllPostToken[i])
+        PostTable = dict()
+        for k in PostTable_byte:
+            key = str(k, 'utf-8')
+            value = PostTable_byte[k]
+            PostTable[key] = str(value, 'utf-8')
+        EmailOfWhoPostIt = PostTable['email']
+        NameOfWhoPostIt_byte = connection.hget(EmailOfWhoPostIt, 'name')
+        NameOfWhoPostIt = str(NameOfWhoPostIt_byte, 'utf-8')
+        PostTopic = PostTable['topic']
+        PostType = PostTable['PostType']
+        PostBody = PostTable['body']
+        tempDictionary = PostInfo[counter]
+        tempDictionary['name'] = NameOfWhoPostIt
+        tempDictionary['topic'] = PostTopic
+        tempDictionary['body'] = PostBody
+        tempDictionary['type'] = PostType
+        tempDictionary['token'] = AllPostToken[i]
+        CommentTableName = 'comment' + AllPostToken[i]
+        CommentList_byte = connection.hgetall(CommentTableName)
+        AllComment = [dict() for x in range(len(CommentList_byte))]
+        CounterComment = 0
+        for k in CommentList_byte:
+            EmailOfWhoCommentIt = str(k, 'utf-8')
+            CommentBody = CommentList_byte[k]
+            NameOfWhoCommentIt_byte = connection.hget(EmailOfWhoCommentIt, 'name')
+            NameOfWhoCommentIt = str(NameOfWhoCommentIt_byte, 'utf-8')
+            CommentList = AllComment[CounterComment]
+            CommentList['name'] = NameOfWhoCommentIt
+            CommentList['body'] = str(CommentBody, 'utf-8')
+            CounterComment += 1
+        tempDictionary['comment'] = AllComment
+        tempDictionary['numberOfComment'] = len(CommentList_byte)
+        counter += 1
+
+    active = dict(home='', profile='active')
+    return render(request, 'MyProfile.html',
+                  {'UserInfo': UserInfo, 'active': active, 'PostInfo': PostInfo, 'FriendInfo': FriendInfo})
+
+
+def Profile(request, UserId, DestinationUserId):
+    connection = redis.StrictRedis(host='localhost', port=6379, db=0)
+    getUser = connection.hget('user', UserId)
+    emailUser = str(getUser, 'utf-8')
+    UserInfoTable = connection.hgetall(emailUser)
+    UserInfo = dict()
+    for k in UserInfoTable:
+        key = str(k, 'utf-8')
+        value = UserInfoTable[k]
+        UserInfo[key] = str(value, 'utf-8')
+    key = 'UserId'
+    UserInfo[key] = UserId
+
+    getDestinationUser = connection.hget('user', DestinationUserId)
+    emailDestinationUser = str(getDestinationUser, 'utf-8')
+    UserInfoTableDestination = connection.hgetall(emailDestinationUser)
+    UserInfoDestination = dict()
+    for k in UserInfoTableDestination:
+        key = str(k, 'utf-8')
+        value = UserInfoTableDestination[k]
+        UserInfoDestination[key] = str(value, 'utf-8')
+    key = 'UserIdDestination'
+    UserInfoDestination[key] = DestinationUserId
+
+    FriendInfo = dict()
+    FollowerTableName = 'FollowerTable' + emailDestinationUser
+    FollowingTableName = 'FollowingTable' + emailDestinationUser
+    Follower_byte = connection.hgetall(FollowerTableName)
+    FollowerList = [dict() for x in range(len(Follower_byte))]
+    CounterFollower = 0
+    for k in Follower_byte:
+        key = str(k, 'utf-8')
+        Follower = FollowerList[CounterFollower]
+        Follower['UserId'] = key
+        value_byte = Follower_byte[k]
+        email = str(value_byte, 'utf-8')
+        name_byte = connection.hget(email, 'name')
+        name = str(name_byte, 'utf-8')
+        Follower['name'] = name
+    Following_byte = connection.hgetall(FollowingTableName)
+    FollowingList = [dict() for x in range(len(Following_byte))]
+    CounterFollowing = 0
+    for k in Following_byte:
+        key = str(k, 'utf-8')
+        Following = FollowingList[CounterFollowing]
+        Following['UserId'] = key
+        value_byte = Following_byte[k]
+        email = str(value_byte, 'utf-8')
+        name_byte = connection.hget(email, 'name')
+        name = str(name_byte, 'utf-8')
+        Following['name'] = name
+        CounterFollowing += 1
+    FriendInfo['FollowerLen'] = len(Follower_byte)
+    FriendInfo['FollowingLen'] = len(Following_byte)
+    FriendInfo['FollowerList'] = FollowerList
+    FriendInfo['FollowingList'] = FollowingList
+
+    FollowingUserIdTableName = 'FollowingTable' + emailUser
+    if connection.hexists(FollowingUserIdTableName, DestinationUserId):
+        OwnPostTableName = 'OwnPostTable' + emailDestinationUser
+        FriendInfo['relation'] = 'UnFollow'
+    else:
+        OwnPostTableName = 'publicPostTable' + emailDestinationUser
+        FriendInfo['relation'] = 'Follow'
+    AllPostToken = connection.lrange(OwnPostTableName, 0, -1)
+    PostInfo = [dict() for x in range(len(AllPostToken))]
+    counter = 0
+    for i in range(len(AllPostToken)):
+        AllPostToken[i] = str(AllPostToken[i], 'utf-8')
+        PostTable_byte = connection.hgetall(AllPostToken[i])
+        PostTable = dict()
+        for k in PostTable_byte:
+            key = str(k, 'utf-8')
+            value = PostTable_byte[k]
+            PostTable[key] = str(value, 'utf-8')
+        EmailOfWhoPostIt = PostTable['email']
+        NameOfWhoPostIt_byte = connection.hget(EmailOfWhoPostIt, 'name')
+        NameOfWhoPostIt = str(NameOfWhoPostIt_byte, 'utf-8')
+        PostTopic = PostTable['topic']
+        PostType = PostTable['PostType']
+        PostBody = PostTable['body']
+        tempDictionary = PostInfo[counter]
+        tempDictionary['name'] = NameOfWhoPostIt
+        tempDictionary['topic'] = PostTopic
+        tempDictionary['body'] = PostBody
+        tempDictionary['type'] = PostType
+        tempDictionary['token'] = AllPostToken[i]
+        CommentTableName = 'comment' + AllPostToken[i]
+        CommentList_byte = connection.hgetall(CommentTableName)
+        AllComment = [dict() for x in range(len(CommentList_byte))]
+        CounterComment = 0
+        for k in CommentList_byte:
+            EmailOfWhoCommentIt = str(k, 'utf-8')
+            CommentBody = CommentList_byte[k]
+            NameOfWhoCommentIt_byte = connection.hget(EmailOfWhoCommentIt, 'name')
+            NameOfWhoCommentIt = str(NameOfWhoCommentIt_byte, 'utf-8')
+            CommentList = AllComment[CounterComment]
+            CommentList['name'] = NameOfWhoCommentIt
+            CommentList['body'] = str(CommentBody, 'utf-8')
+            CounterComment += 1
+        tempDictionary['comment'] = AllComment
+        tempDictionary['numberOfComment'] = len(CommentList_byte)
+        counter += 1
+
+    active = dict(home='', profile='')
+    return render(request, 'UserProfile.html',
+                  {'UserInfo': UserInfo, 'active': active, 'PostInfo': PostInfo, 'FriendInfo': FriendInfo,
+                   'UserInfoDestination': UserInfoDestination})
+
+
+def BlockUser(request, UserId, DestinationUserId):
+    connection = redis.StrictRedis(host='localhost', port=6379, db=0)
+    getUser = connection.hget('user', UserId)
+    emailUser = str(getUser, 'utf-8')
+    getDestinationUser = connection.hget('user', DestinationUserId)
+    emailDestinationUser = str(getDestinationUser, 'utf-8')
+    BlocTableNameUser = 'BlockTable' + emailUser
+    BlocTableNameDestinationUser = 'BlockTable' + emailDestinationUser
+    connection.hset(BlocTableNameDestinationUser, UserId, emailUser)
+    connection.hset(BlocTableNameUser, DestinationUserId, emailDestinationUser)
+    FollowerTableNameUser = 'FollowerTable' + emailUser
+    FollowerTableNameDestinationUser = 'FollowerTable' + emailDestinationUser
+    connection.hdel(FollowerTableNameUser, DestinationUserId, emailDestinationUser)
+    connection.hdel(FollowerTableNameDestinationUser, UserId, emailUser)
+    FollowingTableNameUser = 'FollowingTable' + emailUser
+    FollowingTableNameDestinationUser = 'FollowingTable' + DestinationUserId
+    connection.hdel(FollowingTableNameUser, DestinationUserId, emailDestinationUser)
+    connection.hdel(FollowingTableNameDestinationUser, UserId, emailUser)
+    return HttpResponseRedirect('/UserHomePage/' + UserId)
+
+
+def FollowUser(request, UserId, DestinationUserId):
+    connection = redis.StrictRedis(host='localhost', port=6379, db=0)
+    getUser = connection.hget('user', UserId)
+    emailUser = str(getUser, 'utf-8')
+    getDestinationUser = connection.hget('user', DestinationUserId)
+    emailDestinationUser = str(getDestinationUser, 'utf-8')
+    FollowingTableNameUser = 'FollowingTable' + emailUser
+    FollowerTableNameDestinationUser = 'FollowerTable' + emailDestinationUser
+    connection.hset(FollowingTableNameUser, DestinationUserId, emailDestinationUser)
+    connection.hset(FollowerTableNameDestinationUser, UserId, emailUser)
+    return HttpResponseRedirect('/UserHomePage/' + UserId)
+
+
+def UnFollowUser(request, UserId, DestinationUserId):
+    connection = redis.StrictRedis(host='localhost', port=6379, db=0)
+    getUser = connection.hget('user', UserId)
+    emailUser = str(getUser, 'utf-8')
+    getDestinationUser = connection.hget('user', DestinationUserId)
+    emailDestinationUser = str(getDestinationUser, 'utf-8')
+    FollowingTableNameUser = 'FollowingTable' + emailUser
+    FollowerTableNameDestinationUser = 'FollowerTable' + emailDestinationUser
+    connection.hdel(FollowingTableNameUser, DestinationUserId, emailDestinationUser)
+    connection.hdel(FollowerTableNameDestinationUser, UserId, emailUser)
     return HttpResponseRedirect('/UserHomePage/' + UserId)

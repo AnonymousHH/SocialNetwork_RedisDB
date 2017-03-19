@@ -5,7 +5,7 @@
         <div class="row">
             <div class="col-sm-3 well">
                 <div class="well">
-                    <p><a href="#">My Profile</a></p>
+                    <p><a href="/Profile/{{ UserInfo.UserId }}/GotoProfile/">My Profile</a></p>
                     <img src="{% static 'Image/member-1.jpg' %}" class="img-circle" height="65" width="65" alt="Avatar">
                 </div>
                 <div class="well">
@@ -82,55 +82,60 @@
                             </div>
                         </div>
                         <div class="col-sm-9">
-                            <div class="well">
-                                <div class="panel panel-primary">
-                                    <div class="panel-heading"><p><strong>{{ PostEnter.topic }}</strong></p></div>
-                                    <div class="panel-body"><p>{{ PostEnter.body }}</p></div>
-                                    <div class="panel-footer">
-                                        <a href="#ShowComment{{ PostEnter.topic }}" data-toggle="collapse">Comment <span class="badge">{{ PostEnter.numberOfComment }}</span></a>
-                                        <button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#TakeComment{{ PostEnter.topic }}">Take a comment!</button>
-                                        <div id="TakeComment{{ PostEnter.topic }}" class="collapse">
+                            <div class="panel panel-primary">
+                                <div class="panel-heading"><p><strong>{{ PostEnter.topic }}</strong></p></div>
+                                <div class="panel-body"><p>{{ PostEnter.body }}</p></div>
+                                <div class="panel-footer">
+                                    <a href="#ShowComment{{ PostEnter.topic }}" data-toggle="collapse">Comment <span
+                                            class="badge">{{ PostEnter.numberOfComment }}</span></a>
+                                    <button type="button" class="btn btn-info btn-sm" data-toggle="collapse"
+                                            data-target="#TakeComment{{ PostEnter.topic }}">Take a comment!
+                                    </button>
+                                    <div id="TakeComment{{ PostEnter.topic }}" class="collapse">
+                                        <div class="panel panel-default">
                                             <div class="panel panel-default">
-                                                <div class="panel panel-default">
-                                                    <form action="/Comment/{{ UserInfo.UserId }}" method="post">
-                                                        <div class="modal-body">
-                                                            <div class="form-group">
-                                                                <label for="CommentBody" style="float: left;font-size: 18px">Comment : </label>
-                                                                <textarea class="form-control" rows="3" id="CommentBody" name="CommentBody"></textarea>
-                                                                <input type="hidden" name="token" value="{{ PostEnter.token }}">
-                                                            </div>
-                                                        </div>
-                                                        <div class="modal-footer">
-                                                            <div class="form-group">
-                                                                <button type="submit" class="btn btn-success btn-sm">
-                                                                    POST
-                                                                </button>
-                                                                <button type="button" class="btn btn-default btn-sm"
-                                                                        data-dismiss="modal">
-                                                                    Close
-                                                                </button>
-                                                            </div>
-                                                        </div>
-                                                    </form>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div id="ShowComment{{ PostEnter.topic }}" class="collapse">
-                                            <div class="panel-group" id="accordion">
-                                                {% for eachComment in PostEnter.comment %}
-                                                    <div class="panel panel-default">
-                                                        <div class="panel-heading">
-                                                            <h4 class="panel-title">
-                                                                <a data-toggle="collapse" data-parent="#accordion"
-                                                                   href="#{{ eachComment.name }}">{{ eachComment.name }}</a>
-                                                            </h4>
-                                                        </div>
-                                                        <div id="{{ eachComment.name }}" class="panel-collapse collapse in">
-                                                            <div class="panel-body">{{ eachComment.body }}</div>
+                                                <form action="/Comment/{{ UserInfo.UserId }}" method="post">
+                                                    <div class="modal-body">
+                                                        <div class="form-group">
+                                                            <label for="CommentBody"
+                                                                   style="float: left;font-size: 18px">Comment
+                                                                : </label>
+                                                            <textarea class="form-control" rows="3" id="CommentBody"
+                                                                      name="CommentBody"></textarea>
+                                                            <input type="hidden" name="token"
+                                                                   value="{{ PostEnter.token }}">
                                                         </div>
                                                     </div>
-                                                {% endfor %}
+                                                    <div class="modal-footer">
+                                                        <div class="form-group">
+                                                            <button type="submit" class="btn btn-success btn-sm">
+                                                                POST
+                                                            </button>
+                                                            <button type="button" class="btn btn-default btn-sm"
+                                                                    data-dismiss="modal">
+                                                                Close
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </form>
                                             </div>
+                                        </div>
+                                    </div>
+                                    <div id="ShowComment{{ PostEnter.topic }}" class="collapse">
+                                        <div class="panel-group" id="accordion">
+                                            {% for eachComment in PostEnter.comment %}
+                                                <div class="panel panel-default">
+                                                    <div class="panel-heading">
+                                                        <h4 class="panel-title">
+                                                            <a data-toggle="collapse" data-parent="#accordion"
+                                                               href="#{{ eachComment.name }}">{{ eachComment.name }}</a>
+                                                        </h4>
+                                                    </div>
+                                                    <div id="{{ eachComment.name }}" class="panel-collapse collapse in">
+                                                        <div class="panel-body">{{ eachComment.body }}</div>
+                                                    </div>
+                                                </div>
+                                            {% endfor %}
                                         </div>
                                     </div>
                                 </div>
@@ -255,19 +260,7 @@
                 </div>
             </div>
             <div class="col-sm-2 well">
-                <div class="thumbnail">
-                    <p>Upcoming Events:</p>
-                    <img src="{% static 'Image/member-1.jpg' %}" alt="Paris" width="400" height="300">
-                    <p><strong>Paris</strong></p>
-                    <p>Fri. 27 November 2015</p>
-                    <button class="btn btn-primary">Info</button>
-                </div>
-                <div class="well">
-                    <p>ADS</p>
-                </div>
-                <div class="well">
-                    <p>ADS</p>
-                </div>
+                <!-->
             </div>
         </div>
     </div>
