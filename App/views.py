@@ -507,7 +507,6 @@ def UserDashBoard(request, UserId):
     key = 'UserId'
     UserInfo[key] = UserId
     active = dict(home='', profile='', dashboard='active')
-    IdError = dict()
     return render(request, 'DashBoard.html', {'UserInfo': UserInfo, 'active': active})
 
 
