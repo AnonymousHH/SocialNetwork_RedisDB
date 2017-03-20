@@ -9,7 +9,7 @@ import time
 
 
 def enterPage(request):
-    active = dict(register='', login='active')
+    active = dict(register='', login='active', dashboard='')
     InActive = dict(register='', login='in')
     IdError = dict(register='hideRegister', login='hideLogin')
     return render(request, 'EnterPage.html', {'IdError': IdError, 'active': active, 'InActive': InActive})
@@ -72,7 +72,7 @@ def UserHomePage(request, UserId):
         tempDictionary['numberOfComment'] = len(CommentList_byte)
         counter += 1
 
-    active = dict(home='active', profile='')
+    active = dict(home='active', profile='', dashboard='')
     return render(request, 'home.html', {'UserInfo': UserInfo, 'active': active, 'PostInfo': PostInfo})
 
 
@@ -85,7 +85,7 @@ def Login(request):
     connection = redis.StrictRedis(host='localhost', port=6379, db=0)
     if connection.hset(emailInput, 'password', passwordInput):
         connection.hdel(emailInput)
-        active = dict(register='', login='active')
+        active = dict(register='', login='active', dashboard='')
         InActive = dict(register='', login='in')
         IdError = dict(register='hideRegister', login='showLogin')
         return render(request, 'EnterPage.html', {'IdError': IdError, 'active': active, 'InActive': InActive})
@@ -119,9 +119,9 @@ def Register(request):
         UserId = str(Id)
         return HttpResponseRedirect('/UserHomePage/' + UserId)
     else:
-        active = dict(register='active', login='')
+        active = dict(register='active', login='', dashboard='')
         InActive = dict(register='in', login='')
-        IdError = dict(register='showRegister', login='hideLogin')
+        IdError = dict(register='showRegister', login='hideLogin', dashboard='')
         return render(request, 'EnterPage.html', {'IdError': IdError, 'active': active, 'InActive': InActive})
 
     pass
@@ -215,7 +215,7 @@ def Search(request, UserId):
                 CounterInfoUser += 1
     for i in range(CounterInfoUser):
         allInfoOfUserFind.append(allInfoOfUser[i])
-    active = dict(home='', profile='')
+    active = dict(home='', profile='', dashboard='')
     SourceUserId = dict(SourceID=UserId)
     getUser = connection.hget('user', UserId)
     emailUser = str(getUser, 'utf-8')
@@ -325,7 +325,7 @@ def MyProfile(request, UserId):
         tempDictionary['numberOfComment'] = len(CommentList_byte)
         counter += 1
 
-    active = dict(home='', profile='active')
+    active = dict(home='', profile='active', dashboard='')
     return render(request, 'MyProfile.html',
                   {'UserInfo': UserInfo, 'active': active, 'PostInfo': PostInfo, 'FriendInfo': FriendInfo})
 
@@ -441,7 +441,7 @@ def Profile(request, UserId, DestinationUserId):
         tempDictionary['numberOfComment'] = len(CommentList_byte)
         counter += 1
 
-    active = dict(home='', profile='')
+    active = dict(home='', profile='', dashboard='')
     return render(request, 'UserProfile.html',
                   {'UserInfo': UserInfo, 'active': active, 'PostInfo': PostInfo, 'FriendInfo': FriendInfo,
                    'UserInfoDestination': UserInfoDestination})
@@ -492,3 +492,38 @@ def UnFollowUser(request, UserId, DestinationUserId):
     connection.hdel(FollowingTableNameUser, DestinationUserId, emailDestinationUser)
     connection.hdel(FollowerTableNameDestinationUser, UserId, emailUser)
     return HttpResponseRedirect('/Profile/' + UserId + '/GotoProfile/' + DestinationUserId)
+
+
+def UserDashBoard(request, UserId):
+    connection = redis.StrictRedis(host='localhost', port=6379, db=0)
+    getUser = connection.hget('user', UserId)
+    emailUser = str(getUser, 'utf-8')
+    UserInfoTable = connection.hgetall(emailUser)
+    UserInfo = dict()
+    for k in UserInfoTable:
+        key = str(k, 'utf-8')
+        value = UserInfoTable[k]
+        UserInfo[key] = str(value, 'utf-8')
+    key = 'UserId'
+    UserInfo[key] = UserId
+    active = dict(home='', profile='', dashboard='active')
+    IdError = dict()
+    return render(request, 'DashBoard.html', {'UserInfo': UserInfo, 'active': active})
+
+
+@csrf_exempt
+@require_POST
+def UpdateUserInfo(request, UserId):
+    name = request.POST['name']
+    family = request.POST['family']
+    password = request.POST['pwd']
+    connection = redis.StrictRedis(host='localhost', port=6379, db=0)
+    getUser = connection.hget('user', UserId)
+    emailUser = str(getUser, 'utf-8')
+    connection.hdel(emailUser, 'name')
+    connection.hset(emailUser, 'name', name)
+    connection.hdel(emailUser, 'family')
+    connection.hset(emailUser, 'family', family)
+    connection.hdel(emailUser, 'password')
+    connection.hset(emailUser, 'password', password)
+    return HttpResponseRedirect('/UserHomePage/' + UserId)
