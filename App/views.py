@@ -532,3 +532,48 @@ def UpdateUserInfo(request, UserId):
     connection.hdel(emailUser, 'password')
     connection.hset(emailUser, 'password', password)
     return HttpResponseRedirect('/UserHomePage/' + UserId)
+
+
+@csrf_exempt
+@require_POST
+def EditUserPost(request, UserId):
+    PostTopic = request.POST['UserPostTopic']
+    PostBody = request.POST['UserPostBody']
+    PostType = request.POST['PostType']
+    PostToken = request.POST['token']
+    connection = redis.StrictRedis(host='localhost', port=6379, db=0)
+    connection.hdel(PostToken, 'topic')
+    connection.hset(PostToken, 'topic', PostTopic)
+    connection.hdel(PostToken, 'body')
+    connection.hset(PostToken, 'body', PostBody)
+    connection.hdel(PostToken, 'PostType')
+    connection.hset(PostToken, 'PostType', PostType)
+    return HttpResponseRedirect('/Profile/' + UserId + '/GotoProfile/')
+
+
+@csrf_exempt
+@require_POST
+def DeleteUserPost(request, UserId):
+    token = request.POST['token']
+    PostType = request.POST['PostType']
+    connection = redis.StrictRedis(host='localhost', port=6379, db=0)
+    getEmail = connection.hget('user', UserId)
+    emailUser = str(getEmail, 'utf-8')
+    PostTableName = 'PostTable' + emailUser
+    OwnPostTableName = 'OwnPostTable' + emailUser
+    FilterByTypePostTableName = PostType + 'PostTable' + emailUser
+    FollowerTableName = 'FollowerTable' + emailUser
+    connection.lrem(PostTableName, -1, token)
+    connection.lrem(OwnPostTableName, -1, token)
+    connection.lrem(FilterByTypePostTableName, -1, token)
+    Follower_byte = connection.hgetall(FollowerTableName)
+    Follower = dict()
+    for k in Follower_byte:
+        key = str(k, 'utf-8')
+        value = Follower_byte[k]
+        Follower[key] = str(value, 'utf-8')
+    for key in Follower:
+        emailFollower = Follower[key]
+        FollowerPostTableName = 'PostTable' + emailFollower
+        connection.lrem(FollowerPostTableName, -1, token)
+    return HttpResponseRedirect('/Profile/' + UserId + '/GotoProfile/')
