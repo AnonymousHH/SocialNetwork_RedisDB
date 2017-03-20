@@ -28,7 +28,7 @@
                 <li class="{{ active.home }}"><a href="/UserHomePage/{{ UserInfo.UserId }}">Home</a></li>
                 <li class="{{ active.profile }}"><a href="/Profile/{{ UserInfo.UserId }}/GotoProfile/">My Profile</a></li>
             </ul>
-            <form class="navbar-form navbar-left" action="/Search" method="post">
+            <form class="navbar-form navbar-left" action="/Search/{{ UserInfo.UserId }}" method="post">
                 <div class="input-group">
                     <input type="text" placeholder="Search..." class="form-control" name="search">
                     <div class="input-group-btn">

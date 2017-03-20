@@ -10,18 +10,24 @@
                 </div>
                 <div class="well">
                     <ul class="nav nav-pills nav-justified">
-                        <li><a data-toggle="pill" href="#Follower">Follower <span class="badge">{{ FriendInfo.FollowerLen }}</span></a></li>
-                        <li><a data-toggle="pill" href="#Following">Following <span class="badge">{{ FriendInfo.FollowingLen }}</span></a></li>
+                        <li><a data-toggle="pill" href="#Follower">Follower <span
+                                class="badge">{{ FriendInfo.FollowerLen }}</span></a></li>
+                        <li><a data-toggle="pill" href="#Following">Following <span
+                                class="badge">{{ FriendInfo.FollowingLen }}</span></a></li>
                     </ul>
                     <div class="tab-content">
                         <div id="Follower" class="tab-pane fade">
                             {% for Follower in FriendInfo.FollowerList %}
-                                <a href="/Profile/{{ UserInfo.UserId }}/GotoProfile/{{ Follower.UserId }}">{{ Follower.name }}</a>
+                                <div class="wel well-sm">
+                                    <a href="/Profile/{{ UserInfo.UserId }}/GotoProfile/{{ Follower.UserId }}">{{ Follower.name }} {{ Follower.family }}</a>
+                                </div>
                             {% endfor %}
                         </div>
                         <div id="Following" class="tab-pane fade">
                             {% for Following in FriendInfo.FollowingList %}
-                                <a href="/Profile/{{ UserInfo.UserId }}/GotoProfile/{{ Following.UserId }}">{{ Following.name }}</a>
+                                <div class="wel well-sm">
+                                    <a href="/Profile/{{ UserInfo.UserId }}/GotoProfile/{{ Following.UserId }}">{{ Following.name }} {{ Following.family }}</a>
+                                </div>
                             {% endfor %}
                         </div>
                     </div>

@@ -43,11 +43,14 @@ def UserHomePage(request, UserId):
         EmailOfWhoPostIt = PostTable['email']
         NameOfWhoPostIt_byte = connection.hget(EmailOfWhoPostIt, 'name')
         NameOfWhoPostIt = str(NameOfWhoPostIt_byte, 'utf-8')
+        FamilyOfWhoPostIt_byte = connection.hget(EmailOfWhoPostIt, 'family')
+        FamilyOfWhoPostIt = str(FamilyOfWhoPostIt_byte, 'utf-8')
         PostTopic = PostTable['topic']
         PostType = PostTable['PostType']
         PostBody = PostTable['body']
         tempDictionary = PostInfo[counter]
         tempDictionary['name'] = NameOfWhoPostIt
+        tempDictionary['family'] = FamilyOfWhoPostIt
         tempDictionary['topic'] = PostTopic
         tempDictionary['body'] = PostBody
         tempDictionary['type'] = PostType
@@ -174,9 +177,59 @@ def UserComment(request, UserId):
     return HttpResponseRedirect('/UserHomePage/' + UserId)
 
 
-def Search(request):
+@csrf_exempt
+@require_POST
+def Search(request, UserId):
     SearchQuery = request.POST['search']
-    pass
+    connection = redis.StrictRedis(host='localhost', port=6379, db=0)
+    allUser_byte = connection.hgetall('user')
+    allUser = dict()
+    for k in allUser_byte:
+        key = str(k, 'utf-8')
+        value = allUser_byte[k]
+        allUser[key] = str(value, 'utf-8')
+    EmailCurrentUser_byte = connection.hget('user', UserId)
+    EmailCurrentUser = str(EmailCurrentUser_byte, 'utf-8')
+    BlockTableName = 'BlockTable' + EmailCurrentUser
+    BlockList_byte = connection.hgetall(BlockTableName)
+    BlockList = dict()
+    for k in BlockList_byte:
+        key = str(k, 'utf-8')
+        value = BlockList_byte[k]
+        BlockList[key] = str(value, 'utf-8')
+    allInfoOfUser = [dict() for x in range(len(allUser))]
+    allInfoOfUserFind = []
+    CounterInfoUser = 0
+    for ID in allUser:
+        if UserId != ID and ID not in BlockList.keys():
+            email = allUser[ID]
+            UserName_byte = connection.hget(email, 'name')
+            UserName = str(UserName_byte, 'utf-8')
+            if SearchQuery == UserName:
+                TempInfoDic = allInfoOfUser[CounterInfoUser]
+                TempInfoDic['name'] = UserName
+                FamilyName_byte = connection.hget(email, 'family')
+                FamilyName = str(FamilyName_byte, 'utf-8')
+                TempInfoDic['family'] = FamilyName
+                TempInfoDic['DestinationUserId'] = ID
+                CounterInfoUser += 1
+    for i in range(CounterInfoUser):
+        allInfoOfUserFind.append(allInfoOfUser[i])
+    active = dict(home='', profile='')
+    SourceUserId = dict(SourceID=UserId)
+    getUser = connection.hget('user', UserId)
+    emailUser = str(getUser, 'utf-8')
+    UserInfoTable = connection.hgetall(emailUser)
+    UserInfo = dict()
+    for k in UserInfoTable:
+        key = str(k, 'utf-8')
+        value = UserInfoTable[k]
+        UserInfo[key] = str(value, 'utf-8')
+    key = 'UserId'
+    UserInfo[key] = UserId
+    return render(request, 'SearchPage.html',
+                  {'allInfoOfUserFind': allInfoOfUserFind, 'active': active, 'UserInfo': UserInfo,
+                   'SourceUserId': SourceUserId})
 
 
 def MyProfile(request, UserId):
@@ -205,7 +258,11 @@ def MyProfile(request, UserId):
         email = str(value_byte, 'utf-8')
         name_byte = connection.hget(email, 'name')
         name = str(name_byte, 'utf-8')
+        family_byte = connection.hget(email, 'family')
+        family = str(family_byte, 'utf-8')
         Follower['name'] = name
+        Follower['family'] = family
+        CounterFollower += 1
     Following_byte = connection.hgetall(FollowingTableName)
     FollowingList = [dict() for x in range(len(Following_byte))]
     CounterFollowing = 0
@@ -217,7 +274,10 @@ def MyProfile(request, UserId):
         email = str(value_byte, 'utf-8')
         name_byte = connection.hget(email, 'name')
         name = str(name_byte, 'utf-8')
+        family_byte = connection.hget(email, 'family')
+        family = str(family_byte, 'utf-8')
         Following['name'] = name
+        Following['family'] = family
         CounterFollowing += 1
     FriendInfo['FollowerLen'] = len(Follower_byte)
     FriendInfo['FollowingLen'] = len(Following_byte)
@@ -308,7 +368,11 @@ def Profile(request, UserId, DestinationUserId):
         email = str(value_byte, 'utf-8')
         name_byte = connection.hget(email, 'name')
         name = str(name_byte, 'utf-8')
+        family_byte = connection.hget(email, 'family')
+        family = str(family_byte, 'utf-8')
         Follower['name'] = name
+        Follower['family'] = family
+        CounterFollower += 1
     Following_byte = connection.hgetall(FollowingTableName)
     FollowingList = [dict() for x in range(len(Following_byte))]
     CounterFollowing = 0
@@ -320,7 +384,10 @@ def Profile(request, UserId, DestinationUserId):
         email = str(value_byte, 'utf-8')
         name_byte = connection.hget(email, 'name')
         name = str(name_byte, 'utf-8')
+        family_byte = connection.hget(email, 'family')
+        family = str(family_byte, 'utf-8')
         Following['name'] = name
+        Following['family'] = family
         CounterFollowing += 1
     FriendInfo['FollowerLen'] = len(Follower_byte)
     FriendInfo['FollowingLen'] = len(Following_byte)
@@ -411,7 +478,7 @@ def FollowUser(request, UserId, DestinationUserId):
     FollowerTableNameDestinationUser = 'FollowerTable' + emailDestinationUser
     connection.hset(FollowingTableNameUser, DestinationUserId, emailDestinationUser)
     connection.hset(FollowerTableNameDestinationUser, UserId, emailUser)
-    return HttpResponseRedirect('/UserHomePage/' + UserId)
+    return HttpResponseRedirect('/Profile/' + UserId + '/GotoProfile/' + DestinationUserId)
 
 
 def UnFollowUser(request, UserId, DestinationUserId):
@@ -424,4 +491,4 @@ def UnFollowUser(request, UserId, DestinationUserId):
     FollowerTableNameDestinationUser = 'FollowerTable' + emailDestinationUser
     connection.hdel(FollowingTableNameUser, DestinationUserId, emailDestinationUser)
     connection.hdel(FollowerTableNameDestinationUser, UserId, emailUser)
-    return HttpResponseRedirect('/UserHomePage/' + UserId)
+    return HttpResponseRedirect('/Profile/' + UserId + '/GotoProfile/' + DestinationUserId)
