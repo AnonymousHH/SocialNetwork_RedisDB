@@ -55,6 +55,8 @@ def UserHomePage(request, UserId):
         tempDictionary['body'] = PostBody
         tempDictionary['type'] = PostType
         tempDictionary['token'] = AllPostToken[i]
+        PostTopicId = PostTopic.replace(" ", "")
+        tempDictionary['topicID'] = PostTopicId
         CommentTableName = 'comment' + AllPostToken[i]
         CommentList_byte = connection.hgetall(CommentTableName)
         AllComment = [dict() for x in range(len(CommentList_byte))]
@@ -308,6 +310,8 @@ def MyProfile(request, UserId):
         tempDictionary['body'] = PostBody
         tempDictionary['type'] = PostType
         tempDictionary['token'] = AllPostToken[i]
+        PostTopicId = PostTopic.replace(" ", "")
+        tempDictionary['topicID'] = PostTopicId
         CommentTableName = 'comment' + AllPostToken[i]
         CommentList_byte = connection.hgetall(CommentTableName)
         AllComment = [dict() for x in range(len(CommentList_byte))]
@@ -424,6 +428,8 @@ def Profile(request, UserId, DestinationUserId):
         tempDictionary['body'] = PostBody
         tempDictionary['type'] = PostType
         tempDictionary['token'] = AllPostToken[i]
+        PostTopicId = PostTopic.replace(" ", "")
+        tempDictionary['topicID'] = PostTopicId
         CommentTableName = 'comment' + AllPostToken[i]
         CommentList_byte = connection.hgetall(CommentTableName)
         AllComment = [dict() for x in range(len(CommentList_byte))]

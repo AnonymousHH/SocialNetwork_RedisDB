@@ -48,8 +48,8 @@
                 {% for PostEnter in PostInfo %}
                     <div class="row">
                         <div class="col-sm-3">
-                            <div class="well">
-                                <p>Type:{{ PostEnter.type }}</p>
+                            <div class="well well-sm">
+                                <p>{{ PostEnter.type }}</p>
                             </div>
                         </div>
                         <div class="col-sm-9">
@@ -57,12 +57,12 @@
                                 <div class="panel-heading"><p><strong>{{ PostEnter.topic }}</strong></p></div>
                                 <div class="panel-body"><p>{{ PostEnter.body }}</p></div>
                                 <div class="panel-footer">
-                                    <a href="#ShowComment{{ PostEnter.topic }}" data-toggle="collapse">Comment <span
+                                    <a href="#ShowComment{{ PostEnter.topicID }}" data-toggle="collapse">Comment <span
                                             class="badge">{{ PostEnter.numberOfComment }}</span></a>
                                     <button type="button" class="btn btn-info btn-sm" data-toggle="collapse"
-                                            data-target="#TakeComment{{ PostEnter.topic }}">Take a comment!
+                                            data-target="#TakeComment{{ PostEnter.topicID }}">Take a comment!
                                     </button>
-                                    <div id="TakeComment{{ PostEnter.topic }}" class="collapse">
+                                    <div id="TakeComment{{ PostEnter.topicID }}" class="collapse">
                                         <div class="panel panel-default">
                                             <div class="panel panel-default">
                                                 <form action="/Comment/{{ UserInfo.UserId }}" method="post">
@@ -92,7 +92,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div id="ShowComment{{ PostEnter.topic }}" class="collapse">
+                                    <div id="ShowComment{{ PostEnter.topicID }}" class="collapse">
                                         <div class="panel-group" id="accordion">
                                             {% for eachComment in PostEnter.comment %}
                                                 <div class="panel panel-default">
