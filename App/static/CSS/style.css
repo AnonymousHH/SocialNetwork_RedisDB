@@ -4,3 +4,14 @@ footer {
     color: white;
     padding: 15px;
 }
+.enterPageBody{
+    background-color: #2471a3;
+}
+.enterPageDiv{
+    margin-top: 50px;
+    background-color: white;
+    padding-left: 0;
+    padding-right: 0;
+    border:2px solid #2471a3;
+    border-radius: 6px;
+}
