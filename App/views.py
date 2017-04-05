@@ -144,9 +144,9 @@ def UserPost(request, UserId):
     FollowerTableName = 'FollowerTable' + emailUser
     Timestamp = time.time()
     token = str(Timestamp) + emailUser
-    connection.rpush(PostTableName, token)
-    connection.rpush(OwnPostTableName, token)
-    connection.rpush(FilterByTypePostTableName, token)
+    connection.lpush(PostTableName, token)
+    connection.lpush(OwnPostTableName, token)
+    connection.lpush(FilterByTypePostTableName, token)
     Follower_byte = connection.hgetall(FollowerTableName)
     Follower = dict()
     for k in Follower_byte:
@@ -156,7 +156,7 @@ def UserPost(request, UserId):
     for key in Follower:
         emailFollower = Follower[key]
         FollowerPostTableName = 'PostTable' + emailFollower
-        connection.rpush(FollowerPostTableName, token)
+        connection.lpush(FollowerPostTableName, token)
     connection.hset(token, emailUser, PostTopic)
     connection.hset(token, 'email', emailUser)
     connection.hset(token, 'topic', PostTopic)
