@@ -1,17 +1,33 @@
 /* Set black background color, white text and some padding */
+@font-face {
+    font-family: 'Roboto-Light';
+    font-style: normal;
+    font-weight: 300;
+    src: url('../Font/Roboto-Light.ttf') format('truetype');
+}
+
+body {
+    font-family: 'Roboto-Light', sans-serif;
+    height: 100%;
+}
+
+html {
+    height: 100%;
+}
+
+.backGroundImageEnterPage {
+    min-height: 100%;
+    background: url('../Image/BackGroundEnterPage.jpg') center;
+    background-size: cover;
+}
+
+.enterPageDiv {
+    margin-top: 150px;
+    background-color: rgb(255, 255, 255, 0.5);
+}
+
 footer {
     background-color: #555;
     color: white;
     padding: 15px;
-}
-.enterPageBody{
-    background-color: #2471a3;
-}
-.enterPageDiv{
-    margin-top: 50px;
-    background-color: white;
-    padding-left: 0;
-    padding-right: 0;
-    border:2px solid #2471a3;
-    border-radius: 6px;
 }
