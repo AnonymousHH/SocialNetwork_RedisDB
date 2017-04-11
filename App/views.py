@@ -85,21 +85,28 @@ def Login(request):
     passwordInput = request.POST['pwd']
     UserId = 0
     connection = redis.StrictRedis(host='localhost', port=6379, db=0)
-    if connection.hset(emailInput, 'password', passwordInput):
-        connection.hdel(emailInput)
+    if connection.exists(emailInput):
+        password_byte = connection.hget(emailInput, 'password')
+        password = str(password_byte, 'utf-8')
+        if passwordInput == password:
+            userTable = connection.hgetall('user')
+            for key in userTable:
+                value = userTable[key]
+                stringValue = str(value, 'utf-8')
+                if stringValue == emailInput:
+                    UserId = str(key, 'utf-8')
+                    break
+            return HttpResponseRedirect('/UserHomePage/' + UserId)
+        else:
+            active = dict(register='', login='active', dashboard='')
+            InActive = dict(register='', login='in')
+            IdError = dict(register='hideRegister', login='showLogin')
+            return render(request, 'EnterPage.html', {'IdError': IdError, 'active': active, 'InActive': InActive})
+    else:
         active = dict(register='', login='active', dashboard='')
         InActive = dict(register='', login='in')
         IdError = dict(register='hideRegister', login='showLogin')
         return render(request, 'EnterPage.html', {'IdError': IdError, 'active': active, 'InActive': InActive})
-    else:
-        userTable = connection.hgetall('user')
-        for key in userTable:
-            value = userTable[key]
-            stringValue = str(value, 'utf-8')
-            if stringValue == emailInput:
-                UserId = str(key, 'utf-8')
-                break
-        return HttpResponseRedirect('/UserHomePage/' + UserId)
     pass
 
 
