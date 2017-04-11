@@ -62,6 +62,10 @@ html {
     border: 1px solid #17202a;
 }
 
+.pageBaseBody {
+    background-color: #FBFCFC;
+}
+
 /*base style end*/
 
 /*home page style start*/
@@ -69,7 +73,18 @@ html {
     margin-bottom: 25px;
     float: left;
 }
-.Label{
+
+.Label {
     float: left;
     font-size: 18px
+}
+
+/*home page style end*/
+.well {
+    border: 2px solid #2e86c1;
+    border-radius: 25px;
+}
+
+.panel-primary {
+    border: 1px solid #2C3E50;
 }

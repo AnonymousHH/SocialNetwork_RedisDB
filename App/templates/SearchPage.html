@@ -4,10 +4,9 @@
     <div class="container">
         <div class="row">
             {% for UserInfo in allInfoOfUserFind %}
-                <a class="btn btn-info btn-lg"
-                   href="/Profile/{{ SourceUserId.SourceID }}/GotoProfile/{{ UserInfo.DestinationUserId }}"><i
-                        class="glyphicon glyphicon-user"></i> {{ UserInfo.name }} {{ UserInfo.family }}<br>
-                    <img src="{% static 'Image/member-1.jpg' %}" class="img-circle" height="65" width="65" alt="Avatar"></a>
+                <a class="btn btn-info btn-lg pmd-btn-raised pmd-ripple-effect" href="/Profile/{{ SourceUserId.SourceID }}/GotoProfile/{{ UserInfo.DestinationUserId }}"><i class="glyphicon glyphicon-user"></i> {{ UserInfo.name }} {{ UserInfo.family }}<br>
+                    <img src="{% static 'Image/member-1.jpg' %}" class="img-circle" height="65" width="65" alt="Avatar">
+                </a>
             {% endfor %}
         </div>
     </div>
