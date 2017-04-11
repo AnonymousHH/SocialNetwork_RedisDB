@@ -29,11 +29,9 @@
                 <p><a href="#">Link</a></p>
             </div>
             <div class="col-sm-7">
-
                 <div class="row">
                     <div class="col-sm-12">
-                        <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#PostModal"
-                                style="margin-bottom: 25px;float: left;">
+                        <button type="button" class="btn btn-info btn-lg PostModalBtn" data-toggle="modal" data-target="#PostModal">
                             Your Post
                         </button>
                     </div>
@@ -48,22 +46,23 @@
                             <form action="/UserPost/{{ UserInfo.UserId }}" method="post">
                                 <div class="modal-body">
                                     <div class="form-group">
-                                        <label for="YourPostTopic" style="float: left;font-size: 18px">Topic : </label>
-                                        <textarea class="form-control" rows="1" id="YourPostTopic"
-                                                  name="UserPostTopic"></textarea>
-                                        <label for="YourPostBody" style="float: left;font-size: 18px">Post : </label>
-                                        <textarea class="form-control" rows="5" id="YourPostBody"
-                                                  name="UserPostBody"></textarea>
-                                        <label class="radio-inline btn btn-primary btn-sm"><input type="radio" name="PostType" value="private">Private
-                                            Post</label>
-                                        <label class="radio-inline btn btn-primary btn-sm"><input type="radio" name="PostType" value="public">Public
-                                            Post</label>
+                                        <label for="YourPostTopic" class="Label">Topic : </label>
+                                        <textarea class="form-control" rows="1" id="YourPostTopic" name="UserPostTopic"></textarea>
+                                        <label for="YourPostBody" class="Label">Post : </label>
+                                        <textarea class="form-control" rows="5" id="YourPostBody" name="UserPostBody"></textarea>
+                                        <label class="radio-inline btn btn-primary btn-sm"><input type="radio" name="PostType" value="private">
+                                            Private Post
+                                        </label>
+                                        <label class="radio-inline btn btn-primary btn-sm"><input type="radio" name="PostType" value="public">
+                                            Public Post
+                                        </label>
                                     </div>
                                 </div>
                                 <div class="modal-footer">
                                     <div class="form-group">
                                         <button type="submit" class="btn btn-success">POST</button>
-                                        <button type="button" class="btn btn-danger" data-dismiss="modal">Close
+                                        <button type="button" class="btn btn-danger" data-dismiss="modal">
+                                            Close
                                         </button>
                                     </div>
                                 </div>
@@ -77,8 +76,7 @@
                             <div class="well">
                                 <p>{{ PostEnter.name }} {{ PostEnter.family }}</p>
                                 <p>Type:{{ PostEnter.type }}</p>
-                                <img src="{% static 'Image/member-1.jpg' %}" class="img-circle" height="55" width="55"
-                                     alt="Avatar">
+                                <img src="{% static 'Image/member-1.jpg' %}" class="img-circle" height="55" width="55" alt="Avatar">
                             </div>
                         </div>
                         <div class="col-sm-9">
@@ -86,10 +84,13 @@
                                 <div class="panel-heading"><p><strong>{{ PostEnter.topic }}</strong></p></div>
                                 <div class="panel-body"><p>{{ PostEnter.body }}</p></div>
                                 <div class="panel-footer">
-                                    <a href="#ShowComment{{ PostEnter.topicID }}" data-toggle="collapse">Comment <span
-                                            class="badge">{{ PostEnter.numberOfComment }}</span></a>
-                                    <button type="button" class="btn btn-info btn-sm" data-toggle="collapse"
-                                            data-target="#TakeComment{{ PostEnter.topicID }}">Take a comment!
+                                    <a href="#ShowComment{{ PostEnter.topicID }}" data-toggle="collapse">
+                                        Comment
+                                        <span class="badge">
+                                            {{ PostEnter.numberOfComment }}
+                                        </span>
+                                    </a>
+                                    <button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#TakeComment{{ PostEnter.topicID }}">Take a comment!
                                     </button>
                                     <div id="TakeComment{{ PostEnter.topicID }}" class="collapse">
                                         <div class="panel panel-default">
@@ -97,13 +98,9 @@
                                                 <form action="/Comment/{{ UserInfo.UserId }}" method="post">
                                                     <div class="modal-body">
                                                         <div class="form-group">
-                                                            <label for="CommentBody"
-                                                                   style="float: left;font-size: 18px">Comment
-                                                                : </label>
-                                                            <textarea class="form-control" rows="3" id="CommentBody"
-                                                                      name="CommentBody"></textarea>
-                                                            <input type="hidden" name="token"
-                                                                   value="{{ PostEnter.token }}">
+                                                            <label for="CommentBody" class="Label">Comment: </label>
+                                                            <textarea class="form-control" rows="3" id="CommentBody" name="CommentBody"></textarea>
+                                                            <input type="hidden" name="token" value="{{ PostEnter.token }}">
                                                         </div>
                                                     </div>
                                                     <div class="modal-footer">
@@ -111,8 +108,7 @@
                                                             <button type="submit" class="btn btn-success btn-sm">
                                                                 POST
                                                             </button>
-                                                            <button type="button" class="btn btn-default btn-sm"
-                                                                    data-dismiss="modal">
+                                                            <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">
                                                                 Close
                                                             </button>
                                                         </div>
@@ -127,8 +123,7 @@
                                                 <div class="panel panel-default">
                                                     <div class="panel-heading">
                                                         <h4 class="panel-title">
-                                                            <a data-toggle="collapse" data-parent="#accordion"
-                                                               href="#{{ eachComment.name }}">{{ eachComment.name }}</a>
+                                                            <a data-toggle="collapse" data-parent="#accordion" href="#{{ eachComment.name }}">{{ eachComment.name }}</a>
                                                         </h4>
                                                     </div>
                                                     <div id="{{ eachComment.name }}" class="panel-collapse collapse in">
@@ -146,9 +141,4 @@
             </div>
         </div>
     </div>
-
-    <footer class="container-fluid text-center">
-        <p>Footer Text</p>
-    </footer>
-
 {% endblock %}

@@ -63,3 +63,13 @@ html {
 }
 
 /*base style end*/
+
+/*home page style start*/
+.PostModalBtn {
+    margin-bottom: 25px;
+    float: left;
+}
+.Label{
+    float: left;
+    font-size: 18px
+}
