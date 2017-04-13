@@ -46,9 +46,35 @@
                     <div class="form-group">
                         <div class="col-sm-offset-2 col-sm-10">
                             <button type="submit" class="btn btn-primary pmd-btn-raised pmd-ripple-effect">Login</button>
+                            <button type="button" class="btn btn-default pmd-btn-raised pmd-ripple-effect" data-toggle="modal" data-target="#ForgetPassWord">Forget your password!</button>
                         </div>
                     </div>
                 </form>
+            </div>
+            <div id="ForgetPassWord" class="modal fade">
+                <div class="modal-dialog modal-sm">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            <h1>recovery password</h1>
+                        </div>
+                        <form action="/RecoveryPassword" method="post">
+                            {% csrf_token %}
+                            <div class="modal-body">
+                                <div class="form-group">
+                                    <label for="emailRecovery">Please enter your email:</label>
+                                    <input type="text" id="emailRecovery" class="form-control" name="emailRecovery">
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <div class="form-group">
+                                    <button type="submit" class="btn btn-success pmd-btn-raised pmd-ripple-effect">Submit</button>
+                                    <button type="button" class="btn btn-danger pmd-btn-raised pmd-ripple-effect" data-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
             <div id="Register" class="tab-pane fade {{ InActive.register }} {{ active.register }}">
                 <h2>Pleas Register</h2>

@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% block title %}DashBoard{% endblock %}
 {% block primary %}
     <div class="container">
         <form class="form-horizontal col-sm-offset-2 col-sm-8" action="/ChangeInformationOfUser/{{ UserInfo.UserId }}" method="post" style="margin-top: 50px">

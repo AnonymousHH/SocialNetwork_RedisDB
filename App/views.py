@@ -1,3 +1,4 @@
+from django.core.mail import send_mail
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 
@@ -76,6 +77,27 @@ def UserHomePage(request, UserId):
 
     active = dict(home='active', profile='', dashboard='')
     return render(request, 'home.html', {'UserInfo': UserInfo, 'active': active, 'PostInfo': PostInfo})
+
+
+@csrf_exempt
+@require_POST
+def RecoveryPassword(request):
+    emailRecovery = request.POST['emailRecovery']
+    connection = redis.StrictRedis(host='localhost', port=6379, db=0)
+    if connection.exists(emailRecovery):
+        password_byt = connection.hget(emailRecovery, 'password')
+        password = str(password_byt, 'utf-8')
+        send_mail('recovery password', password, 'ich.bin1373@yahoo.com', [emailRecovery], fail_silently=False)
+        active = dict(register='', login='active', dashboard='')
+        InActive = dict(register='', login='in')
+        IdError = dict(register='hideRegister', login='hideLogin')
+        return render(request, 'EnterPage.html', {'IdError': IdError, 'active': active, 'InActive': InActive})
+    else:
+        active = dict(register='', login='active', dashboard='')
+        InActive = dict(register='', login='in')
+        IdError = dict(register='hideRegister', login='showLogin')
+        return render(request, 'EnterPage.html', {'IdError': IdError, 'active': active, 'InActive': InActive})
+    pass
 
 
 @csrf_exempt
