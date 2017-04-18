@@ -8,6 +8,8 @@ urlpatterns = [
     url(r'^Register$', views.Register, name="Register"),
     url(r'^RecoveryPassword$', views.RecoveryPassword, name="RecoveryPassword"),
     url(r'^UserHomePage/(\d+)$', views.UserHomePage, name="Home"),
+    url(r'^UserHomePage/(?P<UserId>[0-9]+)/getNewPostWithAjax/(?P<countPost>[0-9]+)/$', views.getNewPostWithAjax,
+        name='getNewPostWithAjax'),
     url(r'^UserPost/(\d+)$', views.UserPost, name="UserPost"),
     url(r'^EditUserPost/(\d+)$', views.EditUserPost, name="EditUserPost"),
     url(r'^DeleteUserPost/(\d+)$', views.DeleteUserPost, name="DeleteUserPost"),

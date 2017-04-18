@@ -1,12 +1,13 @@
 from django.core.mail import send_mail
-from django.http import HttpResponseRedirect
-from django.shortcuts import render
+from django.http import HttpResponseRedirect, HttpResponse, Http404
+from django.shortcuts import render, render_to_response
 
 # Create your views here.
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 import redis
 import time
+import json
 
 
 def enterPage(request):
@@ -76,7 +77,73 @@ def UserHomePage(request, UserId):
         counter += 1
 
     active = dict(home='active', profile='', dashboard='')
-    return render(request, 'home.html', {'UserInfo': UserInfo, 'active': active, 'PostInfo': PostInfo})
+    NumberOfPostSendToUser = dict(number=len(PostInfo))
+    return render(request, 'home.html', {'UserInfo': UserInfo, 'active': active, 'PostInfo': PostInfo,
+                                         'NumberOfPostSendToUser': NumberOfPostSendToUser})
+
+
+def getNewPostWithAjax(request, UserId, countPost):
+    if request.is_ajax():
+        connection = redis.StrictRedis(host='localhost', port=6379, db=0)
+        getUser = connection.hget('user', UserId)
+        emailUser = str(getUser, 'utf-8')
+        PostTableName = 'PostTable' + emailUser
+        NumberOfPostSave = connection.llen(PostTableName)
+        if int(countPost) < int(NumberOfPostSave):
+            AllPostToken = connection.lrange(PostTableName, countPost, -1)
+            PostInfo = [dict() for x in range(len(AllPostToken))]
+            counter = 0
+            for i in range(len(AllPostToken)):
+                AllPostToken[i] = str(AllPostToken[i], 'utf-8')
+                PostTable_byte = connection.hgetall(AllPostToken[i])
+                PostTable = dict()
+                for k in PostTable_byte:
+                    key = str(k, 'utf-8')
+                    value = PostTable_byte[k]
+                    PostTable[key] = str(value, 'utf-8')
+                EmailOfWhoPostIt = PostTable['email']
+                NameOfWhoPostIt_byte = connection.hget(EmailOfWhoPostIt, 'name')
+                NameOfWhoPostIt = str(NameOfWhoPostIt_byte, 'utf-8')
+                FamilyOfWhoPostIt_byte = connection.hget(EmailOfWhoPostIt, 'family')
+                FamilyOfWhoPostIt = str(FamilyOfWhoPostIt_byte, 'utf-8')
+                PostTopic = PostTable['topic']
+                PostType = PostTable['PostType']
+                PostBody = PostTable['body']
+                tempDictionary = PostInfo[counter]
+                tempDictionary['name'] = NameOfWhoPostIt
+                tempDictionary['family'] = FamilyOfWhoPostIt
+                tempDictionary['topic'] = PostTopic
+                tempDictionary['body'] = PostBody
+                tempDictionary['type'] = PostType
+                tempDictionary['token'] = AllPostToken[i]
+                PostTopicId = PostTopic.replace(" ", "")
+                tempDictionary['topicID'] = PostTopicId
+                CommentTableName = 'comment' + AllPostToken[i]
+                CommentList_byte = connection.hgetall(CommentTableName)
+                AllComment = [dict() for x in range(len(CommentList_byte))]
+                CounterComment = 0
+                for k in CommentList_byte:
+                    EmailOfWhoCommentIt = str(k, 'utf-8')
+                    CommentBody = CommentList_byte[k]
+                    NameOfWhoCommentIt_byte = connection.hget(EmailOfWhoCommentIt, 'name')
+                    NameOfWhoCommentIt = str(NameOfWhoCommentIt_byte, 'utf-8')
+                    CommentList = AllComment[CounterComment]
+                    CommentList['name'] = NameOfWhoCommentIt
+                    CommentList['body'] = str(CommentBody, 'utf-8')
+                    CounterComment += 1
+                tempDictionary['comment'] = AllComment
+                tempDictionary['numberOfComment'] = len(CommentList_byte)
+                counter += 1
+            NumberOfPostSendToUser = dict(number=NumberOfPostSave)
+            return render_to_response('ajaxPost.html',
+                                      {'PostInfo': PostInfo, 'NumberOfPostSendToUser': NumberOfPostSendToUser})
+        else:
+            listItem = ['you do not have new post']
+            data = json.dumps(listItem)
+            return HttpResponse(data, content_type='application/json')
+    else:
+        return Http404
+    pass
 
 
 @csrf_exempt
